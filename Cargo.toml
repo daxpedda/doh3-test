@@ -1,0 +1,28 @@
+[package]
+name = "doh3-test"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+futures = "0.3"
+h3 = "0.0.2"
+h3-quinn = "0.0.3"
+http = "0.2"
+quinn = { version = "0.10", default-features = false, features = [
+  "runtime-tokio",
+  "tls-rustls",
+  "ring",
+] }
+rustls = "0.21"
+rustls-native-certs = "0.6"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = [
+  "fmt",
+  "ansi",
+  "env-filter",
+  "time",
+  "tracing-log",
+] }
+trust-dns-proto = "0.22"
