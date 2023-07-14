@@ -5,6 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
+bytes = "1"
 futures = "0.3"
 h3 = "0.0.2"
 h3-quinn = "0.0.3"
@@ -26,3 +27,7 @@ tracing-subscriber = { version = "0.3", default-features = false, features = [
   "tracing-log",
 ] }
 trust-dns-proto = "0.22"
+
+[patch.crates-io]
+h3 = { git = "https://github.com/hyperium/h3" }
+h3-quinn = { git = "https://github.com/hyperium/h3" }

@@ -1,3 +1,4 @@
+use bytes::Bytes;
 use futures::future;
 use h3::client;
 use h3_quinn::{
@@ -6,7 +7,7 @@ use h3_quinn::{
 };
 use http::{Request, Version};
 use quinn::ClientConfig;
-use rustls::{version::TLS13, ClientConfig as TlsClientConfig, RootCertStore};
+use rustls::{version::TLS13, ClientConfig as TlsClientConfig, KeyLogFile, RootCertStore};
 use std::{env, error::Error, io, net::Ipv4Addr, str::FromStr, sync::Arc};
 use tokio::io::AsyncWriteExt;
 use tracing::{error, info, warn, Level};
@@ -16,7 +17,7 @@ use trust_dns_proto::{
     rr::{Name, RecordType},
 };
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
@@ -46,6 +47,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     tls_config.enable_early_data = true;
     tls_config.alpn_protocols = vec!["h3".into()];
+    tls_config.key_log = Arc::new(KeyLogFile::new());
 
     let mut client_endpoint = Endpoint::client("[::]:0".parse()?)?;
 
@@ -57,7 +59,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await?;
     let quinn_conn = Connection::new(conn);
 
-    let (mut driver, mut send_request) = client::new(quinn_conn).await?;
+    let (mut driver, mut send_request) = client::builder()
+        .send_grease(false)
+        .build::<_, _, Bytes>(quinn_conn)
+        .await?;
 
     let drive = async move {
         future::poll_fn(|cx| driver.poll_close(cx)).await?;
