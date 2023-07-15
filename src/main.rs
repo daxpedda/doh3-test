@@ -45,7 +45,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .with_root_certificates(roots)
         .with_no_client_auth();
 
-    tls_config.enable_early_data = true;
     tls_config.alpn_protocols = vec!["h3".into()];
     tls_config.key_log = Arc::new(KeyLogFile::new());
 
